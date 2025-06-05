@@ -2,43 +2,55 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct{
+    char mnemon[4];
+    unsigned char opcode;
+    int memoria; 
+} instrucoes;
+
+instrucoes comandos[] = {
+    {"NOP", 0x00, 0},
+    {"STA", 0x10, 1},
+    {"LDA", 0x20, 1},
+    {"ADD", 0x30, 1},
+    {"OR", 0x40, 1},
+    {"AND", 0x50, 1},
+    {"NOT", 0x60, 0},
+    {"JMP", 0x70, 1},
+    {"JN", 0x80, 1},
+    {"JZ", 0x90, 1},
+    {"HLT", 0xF0, 0},
+};
+
 int main(){
-    FILE *arquivoInicial, *arquivoFinal;
-    int num = 0;
-    char comandos[4];
+    FILE *arqInicial, *arqFinal;
+    char linhas[255], mnemon[4];
+    int ler, memoria, i;
 
-    //Abrindo o arquivo "teste.txt" - nao to usando o asm por enquanto pq fica mais facil de testar
+    arqInicial = fopen("input.asm", "r");
+    arqFinal = fopen("output.mem", "wb");
 
-    arquivoInicial = fopen("teste.txt", "r");
-        if(arquivoInicial == NULL){
-            printf("Erro");
-            return 1;
+    char prefixo[] = {0x03, 0x4E, 0x44, 0x52};
+    fwrite(prefixo, sizeof(char), 4, arqFinal);
+
+    while(fgets(linhas, sizeof(linhas), arqInicial)){     
+        for(i=0; i<255; i++) {
+            if(strcmp(mnemon, comandos[i].mnemon) == 0) {
+                fputc(comandos[i].opcode, arqFinal);
+
+                if(comandos[i].memoria) {
+                    fputc((char)memoria, arqFinal);
+                }
+                break;
+            }
         }
-    
-    //Le oq ta escrito no teste.txt e fecha o arquivo
-    fscanf(arquivoInicial, "%s", comandos);
-    fclose(arquivoInicial);
-    
-    /*
-    //Ainda vo arrumar a parte dos comandos
-    if (strcmp(comandos, "LDA") == 0){
-        num = 20;
     }
-    */
-       
-    //Abre o arquivo final "final.txt", tbm to usando o txt pra conseguir ler por enquanto
-    arquivoFinal = fopen("final.txt", "w");
-        if(arquivoFinal == NULL){
-            printf("Erro");
-            return 1;
-        }
     
-    //Coloca o prefixo "03 4E 44 52" que inicializa o neander
-    unsigned char prefixo[] = {0x03, 0x4E, 0x44, 0x52};
-    fwrite(prefixo, sizeof(unsigned char), 4, arquivoFinal);
-    
-    fprintf(arquivoFinal, "%i", num);
-    fclose(arquivoFinal);
+    //ainda esta dando erro no alocamento de memoria
 
+    fclose(arqInicial);
+    fclose(arqFinal);
+
+    printf("Arquivo output.mem gerado!");
     return 0;
 }
